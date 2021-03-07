@@ -21,6 +21,7 @@ Example/
 Examples/
 Doc/
 Docs/
+.idea/
 
 *.cache
 *.pdf
