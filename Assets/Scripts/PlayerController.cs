@@ -31,9 +31,11 @@ public class PlayerController : MonoBehaviour
     void Update()
     {
         var delta = _input.Play.Movement.ReadValue<Vector2>();
+        transform.position += (Vector3)(delta * Time.deltaTime);
     }
 
     void Throw()
     {
+        
     }
 }
