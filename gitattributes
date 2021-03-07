@@ -1,0 +1,84 @@
+* text=auto
+
+# Unity files
+*.meta -text -merge=unityamlmerge
+*.unity -text -merge=unityamlmerge
+*.asset -text -merge=unityamlmerge
+*.prefab -text -merge=unityamlmerge
+
+# Data
+*.xml filter=lfs diff=lfs merge=lfs -text
+
+# Binarys
+*.bin filter=lfs binary
+*.bytes filter=lfs binary
+
+# Fonts
+*SDF.asset filter=lfs diff=lfs merge=lfs -text
+*.ttf filter=lfs binary
+*.otf filter=lfs binary
+
+# Image formats
+*.psd filter=lfs binary
+*.jpg filter=lfs binary
+*.png filter=lfs binary
+*.gif filter=lfs binary
+*.bmp filter=lfs binary
+*.tga filter=lfs binary
+*.tiff filter=lfs binary
+*.iff filter=lfs binary
+*.pict filter=lfs binary
+*.dds filter=lfs binary
+*.xcf filter=lfs binary
+*.ico filter=lfs binary
+
+# Audio formats
+*.mp3 filter=lfs binary
+*.ogg filter=lfs binary
+*.wav filter=lfs binary
+*.aiff filter=lfs binary
+*.aif filter=lfs binary
+*.mod filter=lfs binary
+*.it filter=lfs binary
+*.s3m filter=lfs binary
+*.xm filter=lfs binary
+
+# Video formats
+*.mov filter=lfs binary
+*.avi filter=lfs binary
+*.asf filter=lfs binary
+*.mpg filter=lfs binary
+*.mpeg filter=lfs binary
+*.mp4 filter=lfs binary
+
+# 3D formats
+*.fbx filter=lfs binary
+*.obj filter=lfs binary
+*.max filter=lfs binary
+*.blend filter=lfs binary
+*.dae filter=lfs binary
+*.mb filter=lfs binary
+*.ma filter=lfs binary
+*.3ds filter=lfs binary
+*.dfx filter=lfs binary
+*.c4d filter=lfs binary
+*.lwo filter=lfs binary
+*.lwo2 filter=lfs binary
+*.abc filter=lfs binary
+*.3dm filter=lfs binary
+
+# Build
+*.dll filter=lfs binary
+*.pdb filter=lfs binary
+*.mdb filter=lfs binary
+*.aar filter=lfs binary
+*.so filter=lfs binary
+*.unitypackage filter=lfs binary
+*.bundle/* filter=lfs binary
+
+# Packaging
+*.zip filter=lfs binary
+*.7z filter=lfs binary
+*.gz filter=lfs binary
+*.rar filter=lfs binary
+*.tar filter=lfs binary
