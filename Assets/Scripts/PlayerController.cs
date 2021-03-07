@@ -5,10 +5,11 @@ using UnityEngine;
 
 public class PlayerController : MonoBehaviour
 {
-    private Input _input = new Input();
+    private Input _input;
 
     private void Awake()
     {
+        _input = new Input();
         _input.Play.Throw.performed += context => Throw();
     }
 
@@ -31,11 +32,10 @@ public class PlayerController : MonoBehaviour
     void Update()
     {
         var delta = _input.Play.Movement.ReadValue<Vector2>();
-        transform.position += (Vector3)(delta * Time.deltaTime);
+        transform.position += (Vector3) (delta * Time.deltaTime);
     }
 
     void Throw()
     {
-        
     }
 }
