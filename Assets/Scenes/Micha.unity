@@ -1308,6 +1308,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a683e8350cfe2bd45b66f869f57502c2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  moveSpeed: 600
+  jumpPower: 600
 --- !u!4 &1446708727
 Transform:
   m_ObjectHideFlags: 0
@@ -1335,7 +1337,7 @@ Rigidbody2D:
   m_UseFullKinematicContacts: 0
   m_UseAutoMass: 0
   m_Mass: 1
-  m_LinearDrag: 0
+  m_LinearDrag: 1
   m_AngularDrag: 0.05
   m_GravityScale: 1
   m_Material: {fileID: 0}

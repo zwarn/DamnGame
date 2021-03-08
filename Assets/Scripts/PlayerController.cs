@@ -6,9 +6,14 @@ using UnityEngine;
 public class PlayerController : MonoBehaviour
 {
     private Input _input;
+    private Rigidbody2D _rigidbody;
+
+    public float moveSpeed = 200;
+    public float jumpPower = 200;
 
     private void Awake()
     {
+        _rigidbody = GetComponent<Rigidbody2D>();
         _input = new Input();
         _input.Play.Throw.performed += context => Throw();
         _input.Play.Jump.performed += context => Jump();
@@ -34,7 +39,7 @@ public class PlayerController : MonoBehaviour
     void Update()
     {
         var vertical = _input.Play.Movement.ReadValue<float>();
-        transform.position += Vector3.right * (vertical * Time.deltaTime);
+        _rigidbody.AddForce(Vector2.right * (vertical * moveSpeed * Time.deltaTime));
     }
 
     void Throw()
@@ -43,6 +48,7 @@ public class PlayerController : MonoBehaviour
 
     void Jump()
     {
+        _rigidbody.AddForce(Vector2.up * (jumpPower));
     }
 
     void Interact()
