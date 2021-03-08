@@ -99,7 +99,7 @@ public class @Input : IInputActionCollection, IDisposable
                 {
                     ""name"": """",
                     ""id"": ""d5103dc0-3c3b-4fe8-b063-539713fe9bf7"",
-                    ""path"": ""<Keyboard>/e"",
+                    ""path"": ""<Keyboard>/space"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",

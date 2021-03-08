@@ -7,7 +7,7 @@ public class Selector : MonoBehaviour
 {
     private readonly List<Interactable> _interactables = new List<Interactable>();
 
-    private void OnCollisionEnter2D(Collision2D other)
+    private void OnTriggerEnter2D(Collider2D other)
     {
         var interactable = other.gameObject.GetComponent<Interactable>();
         if (interactable != null)
@@ -16,7 +16,7 @@ public class Selector : MonoBehaviour
         }
     }
 
-    private void OnCollisionExit2D(Collision2D other)
+    private void OnTriggerExit2D(Collider2D other)
     {
         var interactable = other.gameObject.GetComponent<Interactable>();
         if (interactable != null)

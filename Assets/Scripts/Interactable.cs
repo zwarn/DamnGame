@@ -3,4 +3,6 @@
 public interface Interactable
 {
     GameObject GetGameObject();
+
+    void Interact(PlayerController playerController);
 }

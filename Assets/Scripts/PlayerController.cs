@@ -7,7 +7,9 @@ public class PlayerController : MonoBehaviour
 {
     private Input _input;
     private Rigidbody2D _rigidbody;
+    private Item _currentItem;
 
+    public Selector Selector;
     public float moveSpeed = 200;
     public float jumpPower = 200;
 
@@ -18,6 +20,7 @@ public class PlayerController : MonoBehaviour
         _input.Play.Throw.performed += context => Throw();
         _input.Play.Jump.performed += context => Jump();
         _input.Play.Interact.performed += context => Interact();
+        Selector = GetComponentInChildren<Selector>();
     }
 
     private void OnEnable()
@@ -53,5 +56,28 @@ public class PlayerController : MonoBehaviour
 
     void Interact()
     {
+        Selector.Selected()?.Interact(this);
+    }
+
+    public bool HasItem()
+    {
+        return _currentItem != null;
+    }
+
+    public void PickupItem(Item item)
+    {
+        _currentItem = item;
+        item.gameObject.transform.parent = Selector.transform;
+        item.gameObject.transform.localPosition = Vector3.zero;
+        item.GetComponent<Rigidbody2D>().isKinematic = true;
+    }
+
+    public Item GiveItem()
+    {
+        Item item = _currentItem;
+        _currentItem = null;
+        item.transform.parent = null;
+        item.GetComponent<Rigidbody2D>().isKinematic = false;
+        return item;
     }
 }
