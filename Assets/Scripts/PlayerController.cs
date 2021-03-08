@@ -11,6 +11,8 @@ public class PlayerController : MonoBehaviour
     {
         _input = new Input();
         _input.Play.Throw.performed += context => Throw();
+        _input.Play.Jump.performed += context => Jump();
+        _input.Play.Interact.performed += context => Interact();
     }
 
     private void OnEnable()
@@ -31,11 +33,19 @@ public class PlayerController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        var delta = _input.Play.Movement.ReadValue<Vector2>();
-        transform.position += (Vector3) (delta * Time.deltaTime);
+        var vertical = _input.Play.Movement.ReadValue<float>();
+        transform.position += Vector3.right * (vertical * Time.deltaTime);
     }
 
     void Throw()
+    {
+    }
+
+    void Jump()
+    {
+    }
+
+    void Interact()
     {
     }
 }
