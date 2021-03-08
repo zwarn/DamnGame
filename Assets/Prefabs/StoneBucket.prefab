@@ -121,9 +121,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4ad330b4d88c42f0bf3485674939b0b5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  acceptsItem: 0
   sprites:
   - {fileID: 21300000, guid: 6d3d07a5906690d4587cd2dda8eeeb60, type: 3}
   - {fileID: 21300000, guid: a78af7262443ca54086f41a10c8d1d7d, type: 3}
   - {fileID: 21300000, guid: e459eed076b20c141a30fbc76cf9e2aa, type: 3}
   - {fileID: 21300000, guid: a02d4d189de0ec143aaf9bc368b18d1b, type: 3}
+  type: 0
