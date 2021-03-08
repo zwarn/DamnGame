@@ -21,7 +21,7 @@ public class Selector : MonoBehaviour
         var interactable = other.gameObject.GetComponent<Interactable>();
         if (interactable != null)
         {
-            _interactables.Add(interactable);
+            _interactables.Remove(interactable);
         }
     }
 

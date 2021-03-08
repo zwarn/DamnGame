@@ -10,8 +10,9 @@ public class PlayerController : MonoBehaviour
     private Item _currentItem;
 
     public Selector Selector;
-    public float moveSpeed = 200;
-    public float jumpPower = 200;
+    public float moveSpeed = 500;
+    public float jumpPower = 500;
+    public float throwPower = 500;
 
     private void Awake()
     {
@@ -56,6 +57,12 @@ public class PlayerController : MonoBehaviour
 
     void Throw()
     {
+        if (HasItem())
+        {
+            Item item = GiveItem();
+            item.GetComponent<Rigidbody2D>()
+                .AddForce((Vector2.up + transform.localScale.x * Vector2.right) * throwPower);
+        }
     }
 
     void Jump()
