@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Serialization;
 
-public class ResourceContainer : MonoBehaviour, Interactable
+public abstract class ResourceContainer : MonoBehaviour, Interactable
 {
-    public ItemType acceptsItem;
     public List<Sprite> sprites;
 
     private int amount = 0;
@@ -21,19 +21,32 @@ public class ResourceContainer : MonoBehaviour, Interactable
         return gameObject;
     }
 
-    public void Interact(PlayerController playerController)
-    {
-        if (playerController.HasItem() && playerController.getItemType() == acceptsItem && amount < sprites.Count - 1)
-        {
-            Item item = playerController.GiveItem();
-            AddItem();
-            Destroy(item.gameObject);
-        }
-    }
+    public abstract void Interact(PlayerController playerController);
 
     public void AddItem()
     {
         amount++;
         _spriteRenderer.sprite = sprites[amount];
+    }
+
+    public void SubItem()
+    {
+        amount--;
+        _spriteRenderer.sprite = sprites[amount];
+    }
+
+    public int CurrentAmount()
+    {
+        return amount;
+    }
+
+    public int MaxAmount()
+    {
+        return sprites.Count - 1;
+    }
+
+    public bool isFull()
+    {
+        return CurrentAmount() >= MaxAmount();
     }
 }

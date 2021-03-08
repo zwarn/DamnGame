@@ -23,5 +23,5 @@ public class Item : MonoBehaviour, Interactable
 public enum ItemType
 {
     Stone,
-    Wood,
+    Brick,
 }
