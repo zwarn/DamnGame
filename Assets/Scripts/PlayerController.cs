@@ -80,12 +80,23 @@ public class PlayerController : MonoBehaviour
         return _currentItem != null;
     }
 
+    public ItemType getItemType()
+    {
+        if (_currentItem == null)
+        {
+            throw new InvalidOperationException("no item present");
+        }
+
+        return _currentItem.type;
+    }
+
     public void PickupItem(Item item)
     {
         _currentItem = item;
         item.gameObject.transform.parent = Selector.transform;
         item.gameObject.transform.localPosition = Vector3.zero;
         item.GetComponent<Rigidbody2D>().isKinematic = true;
+        item.GetComponent<Collider2D>().enabled = false;
     }
 
     public Item GiveItem()
@@ -94,6 +105,7 @@ public class PlayerController : MonoBehaviour
         _currentItem = null;
         item.transform.parent = null;
         item.GetComponent<Rigidbody2D>().isKinematic = false;
+        item.GetComponent<Collider2D>().enabled = true;
         return item;
     }
 }

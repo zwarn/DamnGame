@@ -110,6 +110,7 @@ MonoBehaviour:
   Selector: {fileID: 0}
   moveSpeed: 600
   jumpPower: 600
+  throwPower: 100
 --- !u!212 &2603193351546269668
 SpriteRenderer:
   m_ObjectHideFlags: 0
