@@ -43,6 +43,15 @@ public class PlayerController : MonoBehaviour
     {
         var vertical = _input.Play.Movement.ReadValue<float>();
         _rigidbody.AddForce(Vector2.right * (vertical * moveSpeed * Time.deltaTime));
+        if (vertical > 0)
+        {
+            transform.localScale = new Vector3(1, 1, 1);
+        }
+
+        if (vertical < 0)
+        {
+            transform.localScale = new Vector3(-1, 1, 1);
+        }
     }
 
     void Throw()
