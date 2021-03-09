@@ -8,6 +8,7 @@ public class PlayerController : MonoBehaviour
     private Input _input;
     private Rigidbody2D _rigidbody;
     private Item _currentItem;
+    private bool isWorking;
 
     public Selector selector;
     public float moveSpeed = 500;
@@ -21,6 +22,8 @@ public class PlayerController : MonoBehaviour
         _input.Play.Throw.performed += context => Throw();
         _input.Play.Jump.performed += context => Jump();
         _input.Play.Interact.performed += context => Interact();
+        _input.Play.Work.started += context => BeginWork();
+        _input.Play.Work.canceled += context => EndWork();
         selector = GetComponentInChildren<Selector>();
     }
 
@@ -47,6 +50,12 @@ public class PlayerController : MonoBehaviour
         {
             transform.localScale = new Vector3(-1, 1, 1);
         }
+
+        var interactable = selector.Selected();
+        if (interactable != null && interactable is Workable workable && isWorking)
+        {
+            workable.Work(this);
+        }
     }
 
     void Throw()
@@ -68,6 +77,17 @@ public class PlayerController : MonoBehaviour
     {
         selector.Selected()?.Interact(this);
     }
+
+    private void EndWork()
+    {
+        isWorking = false;
+    }
+
+    private void BeginWork()
+    {
+        isWorking = true;
+    }
+
 
     public bool HasItem()
     {
