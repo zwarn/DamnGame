@@ -9,7 +9,7 @@ public class PlayerController : MonoBehaviour
     private Rigidbody2D _rigidbody;
     private Item _currentItem;
 
-    public Selector Selector;
+    public Selector selector;
     public float moveSpeed = 500;
     public float jumpPower = 500;
     public float throwPower = 500;
@@ -21,7 +21,7 @@ public class PlayerController : MonoBehaviour
         _input.Play.Throw.performed += context => Throw();
         _input.Play.Jump.performed += context => Jump();
         _input.Play.Interact.performed += context => Interact();
-        Selector = GetComponentInChildren<Selector>();
+        selector = GetComponentInChildren<Selector>();
     }
 
     private void OnEnable()
@@ -34,12 +34,6 @@ public class PlayerController : MonoBehaviour
         _input.Disable();
     }
 
-    // Start is called before the first frame update
-    void Start()
-    {
-    }
-
-    // Update is called once per frame
     void Update()
     {
         var vertical = _input.Play.Movement.ReadValue<float>();
@@ -72,7 +66,7 @@ public class PlayerController : MonoBehaviour
 
     void Interact()
     {
-        Selector.Selected()?.Interact(this);
+        selector.Selected()?.Interact(this);
     }
 
     public bool HasItem()
@@ -93,7 +87,7 @@ public class PlayerController : MonoBehaviour
     public void PickupItem(Item item)
     {
         _currentItem = item;
-        item.gameObject.transform.parent = Selector.transform;
+        item.gameObject.transform.parent = selector.transform;
         item.gameObject.transform.localPosition = Vector3.zero;
         item.GetComponent<Rigidbody2D>().isKinematic = true;
         item.GetComponent<Collider2D>().enabled = false;
