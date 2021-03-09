@@ -9,6 +9,7 @@ public class PlayerController : MonoBehaviour
     private Rigidbody2D _rigidbody;
     private Item _currentItem;
 
+    public Animator animator;
     public Selector selector;
     public float moveSpeed = 500;
     public float jumpPower = 500;
@@ -37,13 +38,17 @@ public class PlayerController : MonoBehaviour
     void Update()
     {
         var vertical = _input.Play.Movement.ReadValue<float>();
+        if (Math.Abs(vertical) > 0.1)
+        {
+            animator.SetFloat("Speed", Math.Abs(vertical));      
+        }
         _rigidbody.AddForce(Vector2.right * (vertical * moveSpeed * Time.deltaTime));
-        if (vertical > 0)
+        if (vertical < 0.1)
         {
             transform.localScale = new Vector3(1, 1, 1);
         }
 
-        if (vertical < 0)
+        if (vertical > 0.1)
         {
             transform.localScale = new Vector3(-1, 1, 1);
         }
