@@ -10,6 +10,12 @@ public class Workbench : MonoBehaviour, Workable, HasItem
     public float workAmount;
 
     private float workDone;
+    private WorkProgress _workProgress;
+
+    private void Awake()
+    {
+        _workProgress = GetComponentInChildren<WorkProgress>();
+    }
 
     public GameObject GetGameObject()
     {
@@ -26,6 +32,8 @@ public class Workbench : MonoBehaviour, Workable, HasItem
                 workDone = 0;
                 craftItem();
             }
+
+            _workProgress.SetFill(workDone / workAmount);
         }
     }
 

@@ -52,7 +52,7 @@ public class PlayerController : MonoBehaviour
         }
 
         var interactable = selector.Selected();
-        if (interactable != null && interactable is Workable workable && isWorking)
+        if (interactable != null && interactable is Workable workable && isWorking && !HasItem())
         {
             workable.Work(this);
         }
