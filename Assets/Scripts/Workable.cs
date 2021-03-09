@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-public interface Workable
+public interface Workable : Interactable
 {
     GameObject GetGameObject();
 

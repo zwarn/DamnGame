@@ -1,8 +1,19 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 
-public class Resource : MonoBehaviour, Interactable
+public class Resource : MonoBehaviour, Workable
 {
     public GameObject resource;
+    public float workAmount;
+
+    private float workDone;
+    private WorkProgress _workProgress;
+
+
+    private void Awake()
+    {
+        _workProgress = GetComponentInChildren<WorkProgress>();
+    }
 
     public GameObject GetGameObject()
     {
@@ -11,10 +22,18 @@ public class Resource : MonoBehaviour, Interactable
 
     public void Interact(PlayerController playerController)
     {
-        if (!playerController.HasItem())
+    }
+
+    public void Work(PlayerController playerController)
+    {
+        workDone += Time.deltaTime;
+        if (workDone >= workAmount)
         {
+            workDone = 0;
             Item item = Instantiate(resource).GetComponent<Item>();
             playerController.PickupItem(item);
         }
+
+        _workProgress.SetFill(workDone / workAmount);
     }
 }

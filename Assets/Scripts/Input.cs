@@ -49,6 +49,14 @@ public class @Input : IInputActionCollection, IDisposable
                     ""expectedControlType"": ""Button"",
                     ""processors"": """",
                     ""interactions"": """"
+                },
+                {
+                    ""name"": ""Work"",
+                    ""type"": ""Button"",
+                    ""id"": ""d7576793-655c-4d8a-b436-b9023a610b7f"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """"
                 }
             ],
             ""bindings"": [
@@ -183,6 +191,28 @@ public class @Input : IInputActionCollection, IDisposable
                     ""action"": ""Jump"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""7ba26457-e58d-449f-96f6-5f3721a680f4"",
+                    ""path"": ""<Keyboard>/q"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Work"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""377a2509-26c9-4a38-832d-eb996ea60fe2"",
+                    ""path"": ""<Gamepad>/buttonWest"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Work"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         }
@@ -195,6 +225,7 @@ public class @Input : IInputActionCollection, IDisposable
         m_Play_Movement = m_Play.FindAction("Movement", throwIfNotFound: true);
         m_Play_Interact = m_Play.FindAction("Interact", throwIfNotFound: true);
         m_Play_Jump = m_Play.FindAction("Jump", throwIfNotFound: true);
+        m_Play_Work = m_Play.FindAction("Work", throwIfNotFound: true);
     }
 
     public void Dispose()
@@ -248,6 +279,7 @@ public class @Input : IInputActionCollection, IDisposable
     private readonly InputAction m_Play_Movement;
     private readonly InputAction m_Play_Interact;
     private readonly InputAction m_Play_Jump;
+    private readonly InputAction m_Play_Work;
     public struct PlayActions
     {
         private @Input m_Wrapper;
@@ -256,6 +288,7 @@ public class @Input : IInputActionCollection, IDisposable
         public InputAction @Movement => m_Wrapper.m_Play_Movement;
         public InputAction @Interact => m_Wrapper.m_Play_Interact;
         public InputAction @Jump => m_Wrapper.m_Play_Jump;
+        public InputAction @Work => m_Wrapper.m_Play_Work;
         public InputActionMap Get() { return m_Wrapper.m_Play; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -277,6 +310,9 @@ public class @Input : IInputActionCollection, IDisposable
                 @Jump.started -= m_Wrapper.m_PlayActionsCallbackInterface.OnJump;
                 @Jump.performed -= m_Wrapper.m_PlayActionsCallbackInterface.OnJump;
                 @Jump.canceled -= m_Wrapper.m_PlayActionsCallbackInterface.OnJump;
+                @Work.started -= m_Wrapper.m_PlayActionsCallbackInterface.OnWork;
+                @Work.performed -= m_Wrapper.m_PlayActionsCallbackInterface.OnWork;
+                @Work.canceled -= m_Wrapper.m_PlayActionsCallbackInterface.OnWork;
             }
             m_Wrapper.m_PlayActionsCallbackInterface = instance;
             if (instance != null)
@@ -293,6 +329,9 @@ public class @Input : IInputActionCollection, IDisposable
                 @Jump.started += instance.OnJump;
                 @Jump.performed += instance.OnJump;
                 @Jump.canceled += instance.OnJump;
+                @Work.started += instance.OnWork;
+                @Work.performed += instance.OnWork;
+                @Work.canceled += instance.OnWork;
             }
         }
     }
@@ -303,5 +342,6 @@ public class @Input : IInputActionCollection, IDisposable
         void OnMovement(InputAction.CallbackContext context);
         void OnInteract(InputAction.CallbackContext context);
         void OnJump(InputAction.CallbackContext context);
+        void OnWork(InputAction.CallbackContext context);
     }
 }

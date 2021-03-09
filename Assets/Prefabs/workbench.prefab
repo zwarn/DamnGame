@@ -100,6 +100,7 @@ MonoBehaviour:
   from: 0
   to: {fileID: 2738434069430497072, guid: 8874937dbcbb7f148a8a50f060787652, type: 3}
   _currentItem: {fileID: 0}
+  workAmount: 1
 --- !u!61 &6991403549363659259
 BoxCollider2D:
   m_ObjectHideFlags: 0

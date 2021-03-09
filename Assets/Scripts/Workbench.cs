@@ -1,12 +1,21 @@
 ﻿using System;
 using UnityEngine;
 
-public class Workbench : MonoBehaviour, Interactable, Workable, HasItem
+public class Workbench : MonoBehaviour, Workable, HasItem
 {
     public GameObject itemHolder;
     public ItemType from;
     public GameObject to;
     public Item _currentItem;
+    public float workAmount;
+
+    private float workDone;
+    private WorkProgress _workProgress;
+
+    private void Awake()
+    {
+        _workProgress = GetComponentInChildren<WorkProgress>();
+    }
 
     public GameObject GetGameObject()
     {
@@ -15,10 +24,33 @@ public class Workbench : MonoBehaviour, Interactable, Workable, HasItem
 
     public void Work(PlayerController playerController)
     {
+        if (HasItem() && getItemType() == from)
+        {
+            workDone += Time.deltaTime;
+            if (workDone >= workAmount)
+            {
+                workDone = 0;
+                craftItem();
+            }
+
+            _workProgress.SetFill(workDone / workAmount);
+        }
+    }
+
+    private void craftItem()
+    {
+        Destroy(GiveItem().gameObject);
+        PickupItem(Instantiate(to).GetComponent<Item>());
     }
 
     public void Interact(PlayerController playerController)
     {
+        if (!playerController.HasItem() && HasItem())
+        {
+            Item item = GiveItem();
+            playerController.PickupItem(item);
+        }
+
         if (playerController.HasItem() && playerController.getItemType() == from && !HasItem())
         {
             Item item = playerController.GiveItem();
