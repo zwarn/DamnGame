@@ -8,13 +8,36 @@ public class PlayerController : MonoBehaviour
     private Input _input;
     private Rigidbody2D _rigidbody;
     private Item _currentItem;
-    private bool isWorking;
+    private bool _isWorking;
+    public int isGrounded = 0;  // can't use bool as OnCollisionEnter2D/Exit2d order is undeterministic
 
+    public Collider2D bottomEdgeCollider2D;
     public Animator animator;
     public Selector selector;
-    public float moveSpeed = 500;
-    public float jumpPower = 500;
-    public float throwPower = 500;
+    public float moveSpeed;
+    public float jumpPower;
+    public float throwPower;
+    
+    
+    void OnCollisionEnter2D(Collision2D col)
+    {
+        if (col.otherCollider == bottomEdgeCollider2D) {
+            isGrounded++;  // can't use bool as OnCollisionEnter2D/Exit2d order is undeterministic
+            animator.SetInteger("isGrounded", isGrounded);
+            Debug.Log(isGrounded);
+        }
+    }
+    
+    private void OnCollisionExit2D(Collision2D col)
+    {
+        if (col.otherCollider == bottomEdgeCollider2D) {
+            isGrounded--;  // can't use bool as OnCollisionEnter2D/Exit2d order is undeterministic
+            animator.SetInteger("isGrounded", isGrounded);
+            Debug.Log(isGrounded);
+        }
+    }
+
+
 
     private void Awake()
     {
@@ -41,23 +64,33 @@ public class PlayerController : MonoBehaviour
     void Update()
     {
         var vertical = _input.Play.Movement.ReadValue<float>();
-        if (Math.Abs(vertical) > 0.1)
+        if (Math.Abs(vertical) > 0.5)
         {
-            animator.SetFloat("Speed", Math.Abs(vertical));      
+            // player holds left or right
+
+            // normalize controller input
+            if (vertical < 0)
+            {
+                vertical = -1;
+            }
+            else
+            {
+                vertical = 1;
+            }
+
+            transform.localScale = new Vector3(-vertical, 1, 1); // flip player towards pressed direction 
+            _rigidbody.AddForce(Vector2.right * (vertical * moveSpeed * Time.deltaTime));
+            animator.SetFloat("Speed", 1);
         }
-        _rigidbody.AddForce(Vector2.right * (vertical * moveSpeed * Time.deltaTime));
-        if (vertical < 0.1)
+        else
         {
-            transform.localScale = new Vector3(1, 1, 1);
+            // no input or controller input too low
+            animator.SetFloat("Speed", 0);
         }
 
-        if (vertical > 0.1)
-        {
-            transform.localScale = new Vector3(-1, 1, 1);
-        }
 
         var interactable = selector.Selected();
-        if (interactable != null && interactable is Workable workable && isWorking && !HasItem())
+        if (interactable != null && interactable is Workable workable && _isWorking && !HasItem())
         {
             workable.Work(this);
         }
@@ -85,12 +118,12 @@ public class PlayerController : MonoBehaviour
 
     private void EndWork()
     {
-        isWorking = false;
+        _isWorking = false;
     }
 
     private void BeginWork()
     {
-        isWorking = true;
+        _isWorking = true;
     }
 
 
