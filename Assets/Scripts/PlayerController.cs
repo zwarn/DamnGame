@@ -88,7 +88,6 @@ public class PlayerController : MonoBehaviour
     private static readonly int IsGrounded = Animator.StringToHash("isGrounded");
     private static readonly int IsPushingFrontWall = Animator.StringToHash("isPushingFrontWall");
 
-
     private void OnCollisionEnter2D(Collision2D collision)
     {
         if (collision.otherCollider == _topEdgeCollider2D)
