@@ -57,6 +57,14 @@ public class @Input : IInputActionCollection, IDisposable
                     ""expectedControlType"": ""Button"",
                     ""processors"": """",
                     ""interactions"": """"
+                },
+                {
+                    ""name"": ""TEST"",
+                    ""type"": ""Button"",
+                    ""id"": ""bf04176a-c3ae-4bb6-b627-bb4c5c8e54c7"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """"
                 }
             ],
             ""bindings"": [
@@ -213,6 +221,17 @@ public class @Input : IInputActionCollection, IDisposable
                     ""action"": ""Work"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""3c969467-3fff-43ec-8f9a-a1d376444d8d"",
+                    ""path"": ""<Gamepad>/buttonNorth"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""TEST"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         }
@@ -226,6 +245,7 @@ public class @Input : IInputActionCollection, IDisposable
         m_Play_Interact = m_Play.FindAction("Interact", throwIfNotFound: true);
         m_Play_Jump = m_Play.FindAction("Jump", throwIfNotFound: true);
         m_Play_Work = m_Play.FindAction("Work", throwIfNotFound: true);
+        m_Play_TEST = m_Play.FindAction("TEST", throwIfNotFound: true);
     }
 
     public void Dispose()
@@ -280,6 +300,7 @@ public class @Input : IInputActionCollection, IDisposable
     private readonly InputAction m_Play_Interact;
     private readonly InputAction m_Play_Jump;
     private readonly InputAction m_Play_Work;
+    private readonly InputAction m_Play_TEST;
     public struct PlayActions
     {
         private @Input m_Wrapper;
@@ -289,6 +310,7 @@ public class @Input : IInputActionCollection, IDisposable
         public InputAction @Interact => m_Wrapper.m_Play_Interact;
         public InputAction @Jump => m_Wrapper.m_Play_Jump;
         public InputAction @Work => m_Wrapper.m_Play_Work;
+        public InputAction @TEST => m_Wrapper.m_Play_TEST;
         public InputActionMap Get() { return m_Wrapper.m_Play; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -313,6 +335,9 @@ public class @Input : IInputActionCollection, IDisposable
                 @Work.started -= m_Wrapper.m_PlayActionsCallbackInterface.OnWork;
                 @Work.performed -= m_Wrapper.m_PlayActionsCallbackInterface.OnWork;
                 @Work.canceled -= m_Wrapper.m_PlayActionsCallbackInterface.OnWork;
+                @TEST.started -= m_Wrapper.m_PlayActionsCallbackInterface.OnTEST;
+                @TEST.performed -= m_Wrapper.m_PlayActionsCallbackInterface.OnTEST;
+                @TEST.canceled -= m_Wrapper.m_PlayActionsCallbackInterface.OnTEST;
             }
             m_Wrapper.m_PlayActionsCallbackInterface = instance;
             if (instance != null)
@@ -332,6 +357,9 @@ public class @Input : IInputActionCollection, IDisposable
                 @Work.started += instance.OnWork;
                 @Work.performed += instance.OnWork;
                 @Work.canceled += instance.OnWork;
+                @TEST.started += instance.OnTEST;
+                @TEST.performed += instance.OnTEST;
+                @TEST.canceled += instance.OnTEST;
             }
         }
     }
@@ -343,5 +371,6 @@ public class @Input : IInputActionCollection, IDisposable
         void OnInteract(InputAction.CallbackContext context);
         void OnJump(InputAction.CallbackContext context);
         void OnWork(InputAction.CallbackContext context);
+        void OnTEST(InputAction.CallbackContext context);
     }
 }
