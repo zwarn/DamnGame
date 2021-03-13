@@ -16597,7 +16597,7 @@ PrefabInstance:
     - target: {fileID: 2603193351546269671, guid: 65f34befda860364c8bd6d324a15b03d,
         type: 3}
       propertyPath: slidingFrictionY
-      value: 5
+      value: 10
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 65f34befda860364c8bd6d324a15b03d, type: 3}
