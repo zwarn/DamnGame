@@ -8,49 +8,57 @@ using UnityEngine.Serialization;
 public class PlayerController : MonoBehaviour
 {
     [SerializeField] private bool debugMode;
-    [SerializeField] private float accelerationHorizontalGround;
-    [SerializeField] private float decelerationHorizontalGround;
-    [SerializeField] private float accelerationHorizontalAir;
-    [SerializeField] private float decelerationHorizontalAir;
-    [SerializeField] private float maxMovementSpeedHorizontal;
-    [SerializeField] private int jumpCoyoteTimeInFrames;
-    [SerializeField] private int jumpInputBufferInFrames;
+    [SerializeField] private float maxMovementSpeedX;
+    [SerializeField] private float accelerationXGround;
+    [SerializeField] private float decelerationXGround;
+    [SerializeField] private float decelerationXGroundWithDirectionBoost;
+    [SerializeField] private float accelerationXAir;
+    [SerializeField] private float decelerationXAir;
+    [SerializeField] private float decelerationXAirWithDirectionBoost;
+    [SerializeField] private float targetSpeedOvershotPreventionRange;
+    [SerializeField] private float jumpForce;
+    [SerializeField] private float wallJumpForce;
+    [SerializeField] private float wallJumpVelocityYReduction;
+    [SerializeField] private float jumpHoldGravityReduction;
+    [SerializeField] private int jumpCoyoteTimeInTicks;
+    [SerializeField] private int jumpInputBufferInTicks;
     [SerializeField] private float peakJumpReducedGravityMultiplier;
-    [SerializeField] private float peakJumpReducedGravityAttackSpeed;
+    [SerializeField] private float peakJumpReducedGravityMultiplierVariance;
+    [SerializeField] private float jumpProhibitionTicks;
     [SerializeField] private float jumpCornerCorrectionInTiles;
+    [SerializeField] private float gravity;
+    [SerializeField] private float airFrictionY;
+    [SerializeField] private float slidingFrictionY;
     [SerializeField] private float dashForce;
     [SerializeField] private float dashCornerCorrectionInTiles;
-    [SerializeField] private float jumpForce;
-    [SerializeField] private float jumpHoldBoost;
-    [SerializeField] private float airFrictionX;
-    [SerializeField] private float airFrictionY;
-    [SerializeField] private float groundFrictionX;
-    [SerializeField] private float slidingFrictionY;
-    [SerializeField] private float jumpProhibitionframes;
-    [SerializeField] private float wallJumpForce;
-    
+
+
     // collider checks
     private int _isCollidingTop = 0; // can't use bool as OnCollisionEnter2D/Exit2d order is undeterministic
     private int _isCollidingBottom = 0; // can't use bool as OnCollisionEnter2D/Exit2d order is undeterministic
-    private int _isCollidingFront = 0; // can't use bool as OnCollisionEnter2D/Exit2d order is undeterministic
     private int _isCollidingBack = 0; // can't use bool as OnCollisionEnter2D/Exit2d order is undeterministic
+    private int _isCollidingFront = 0; // can't use bool as OnCollisionEnter2D/Exit2d order is undeterministic
 
-    // player states
+    // game status
+    private int _gameTick = 0;
+
+
+    // player status
     private bool _isGrounded = false;
     private bool _isPushingFrontWall = false;
     private bool _isMovingX = false;
     private bool _canWallJumpFront = false;
     private bool _canWallJumpBack = false;
-    private int _framesPassedSinceLastJumpInput = 0;
-    private int _framesPassedSinceLastJumpPerformed = 0;
-    private int _jumpProhibitionframesPassed = 0;
+    private float _canWallJumpFrontDirectiom;
+    private float _canWallJumpBackDirectiom;
+    private int _ticksPassedSinceLastJumpInput = 0;
+    private int _ticksPassedSinceLastJumpPerformed = 0;
+    private int _jumpProhibitionTicksPassed = 0;
     private bool _jumpInputDown = false;
-    private int _framesPassedSinceLastIsGrounded = 0;
+    private bool _jumpPerformed = true;
+    private int _ticksPassedSinceLastIsGrounded = 0;
     private int _facingDirection = -1;
     private bool _isHoldInputJumpBoosting = false;
-    private bool _isHoldDirectionJumpBoosting = false;
-    private int _isHoldDirectionJumpBoostingDirection = 0;
-    
 
     //player inputs
     private Input _input;
@@ -62,6 +70,7 @@ public class PlayerController : MonoBehaviour
     private bool _isWorking;
 
     private FrontWallJumpColliderTrigger _frontWallJumpColliderTrigger;
+    private BackWallJumpColliderTrigger _backWallJumpColliderTrigger;
 
     public GameObject animationGameObject;
     public Selector selector;
@@ -75,8 +84,8 @@ public class PlayerController : MonoBehaviour
     private EdgeCollider2D[] _edgeColliders;
     private EdgeCollider2D _topEdgeCollider2D;
     private EdgeCollider2D _bottomEdgeCollider2D;
-    private EdgeCollider2D _leftEdgeCollider2D;
-    private EdgeCollider2D _rightEdgeCollider2D;
+    private EdgeCollider2D _backEdgeCollider2D;
+    private EdgeCollider2D _frontEdgeCollider2D;
 
     // debug
     private Renderer _debugRenderer;
@@ -88,6 +97,7 @@ public class PlayerController : MonoBehaviour
     private static readonly int IsGrounded = Animator.StringToHash("isGrounded");
     private static readonly int IsPushingFrontWall = Animator.StringToHash("isPushingFrontWall");
 
+    private const float NoVelocityTolerance = 0.01f;
 
     private void OnCollisionEnter2D(Collision2D collision)
     {
@@ -99,13 +109,13 @@ public class PlayerController : MonoBehaviour
         {
             _isCollidingBottom += 1; // can't use bool as OnCollisionEnter2D/Exit2d order is undeterministic
         }
-        else if (collision.otherCollider == _leftEdgeCollider2D)
-        {
-            _isCollidingFront += 1; // can't use bool as OnCollisionEnter2D/Exit2d order is undeterministic
-        }
-        else if (collision.otherCollider == _rightEdgeCollider2D)
+        else if (collision.otherCollider == _backEdgeCollider2D)
         {
             _isCollidingBack += 1; // can't use bool as OnCollisionEnter2D/Exit2d order is undeterministic
+        }
+        else if (collision.otherCollider == _frontEdgeCollider2D)
+        {
+            _isCollidingFront += 1; // can't use bool as OnCollisionEnter2D/Exit2d order is undeterministic
         }
     }
 
@@ -119,24 +129,27 @@ public class PlayerController : MonoBehaviour
         {
             _isCollidingBottom -= 1; // can't use bool as OnCollisionEnter2D/Exit2d order is undeterministic
         }
-        else if (collision.otherCollider == _leftEdgeCollider2D)
-        {
-            _isCollidingFront -= 1; // can't use bool as OnCollisionEnter2D/Exit2d order is undeterministic
-        }
-        else if (collision.otherCollider == _rightEdgeCollider2D)
+        else if (collision.otherCollider == _backEdgeCollider2D)
         {
             _isCollidingBack -= 1; // can't use bool as OnCollisionEnter2D/Exit2d order is undeterministic
+        }
+        else if (collision.otherCollider == _frontEdgeCollider2D)
+        {
+            _isCollidingFront -= 1; // can't use bool as OnCollisionEnter2D/Exit2d order is undeterministic
         }
     }
 
     private void Test1()
     {
+        _rigidbody.AddForce(new Vector2(_inputX * 2500, 2800));
         Debug.Log("started");
     }
+
     private void Test2()
     {
         Debug.Log("performed");
     }
+
     private void Test3()
     {
         Debug.Log("canceled");
@@ -160,9 +173,10 @@ public class PlayerController : MonoBehaviour
         _edgeColliders = GetComponents<EdgeCollider2D>();
         _topEdgeCollider2D = _edgeColliders[0];
         _bottomEdgeCollider2D = _edgeColliders[1];
-        _leftEdgeCollider2D = _edgeColliders[2];
-        _rightEdgeCollider2D = _edgeColliders[3];
+        _frontEdgeCollider2D = _edgeColliders[2];
+        _backEdgeCollider2D = _edgeColliders[3];
         _frontWallJumpColliderTrigger = GetComponentInChildren<FrontWallJumpColliderTrigger>();
+        _backWallJumpColliderTrigger = GetComponentInChildren<BackWallJumpColliderTrigger>();
 
         var allSpriteRenderer = GetComponentsInChildren<SpriteRenderer>();
         foreach (var spriteRenderer in allSpriteRenderer)
@@ -231,15 +245,16 @@ public class PlayerController : MonoBehaviour
 
     void JumpDown()
     {
-        _framesPassedSinceLastJumpInput = 0;
+        _ticksPassedSinceLastJumpInput = 0;
         _jumpInputDown = true;
+        _jumpPerformed = false;
     }
 
     void JumpUp()
     {
         _jumpInputDown = false;
     }
-    
+
     void Interact()
     {
         selector.Selected()?.Interact(this);
@@ -307,6 +322,9 @@ public class PlayerController : MonoBehaviour
             {
                 _inputX = 1;
             }
+            // flip player towards pressed direction 
+            _facingDirection = (int) (_inputX);
+            transform.localScale = new Vector3(_facingDirection, 1, 1);
         }
         else
         {
@@ -317,32 +335,22 @@ public class PlayerController : MonoBehaviour
 
     private void SetPlayerStatus()
     {
-        // flip player towards pressed direction 
-        if (Math.Abs(_inputX) > 0)
-        {
-            _facingDirection = (int) (_inputX);
-        }
-
         _isMovingX = Math.Abs(_inputX) > 0;
-        _isGrounded = _isCollidingBottom > 0;
+        _isGrounded = _isCollidingBottom > 0 && Math.Abs(_rigidbody.velocity.y) <= NoVelocityTolerance;
         if (_isGrounded)
         {
-            _framesPassedSinceLastIsGrounded = 0;
+            _ticksPassedSinceLastIsGrounded = 0;
         }
-
         _isPushingFrontWall = _isCollidingFront > 0 && _isMovingX;
 
         _canWallJumpFront = _frontWallJumpColliderTrigger.isCollidingWallJumpFront > 0;
+        _canWallJumpFrontDirectiom = -_frontWallJumpColliderTrigger.isCollidingWallJumpFrontFacingDirection;
+        _canWallJumpBack = _backWallJumpColliderTrigger.isCollidingWallJumpBack > 0;
+        _canWallJumpBackDirectiom = _backWallJumpColliderTrigger.isCollidingWallJumpBackFacingDirection;
     }
 
     private void SetAnimator()
     {
-        // flip player towards pressed direction 
-        if (Math.Abs(_inputX) > 0)
-        {
-            transform.localScale = new Vector3(-_facingDirection, 1, 1);
-        }
-
         _animator.SetBool(IsMovingX, _isMovingX);
         _animator.SetBool(IsGrounded, _isGrounded);
         _animator.SetBool(IsPushingFrontWall, _isPushingFrontWall);
@@ -350,109 +358,206 @@ public class PlayerController : MonoBehaviour
 
     private void ApplyMovement()
     {
-        if ( _jumpInputDown && _framesPassedSinceLastJumpInput < jumpInputBufferInFrames && _jumpProhibitionframesPassed >= jumpProhibitionframes )
+        // jumping
+        if (
+            _jumpInputDown // jump input is held down
+            && _ticksPassedSinceLastJumpInput <= jumpInputBufferInTicks // jump down was input within last x ticks
+            && !_jumpPerformed // jump was not already executed
+            && _ticksPassedSinceLastJumpPerformed >
+            jumpProhibitionTicks // minimum ticks in between two jumps has passed
+        )
         {
-            // got jump input
-            if (_framesPassedSinceLastIsGrounded < jumpCoyoteTimeInFrames)
+            // jump was input
+            if (
+                _ticksPassedSinceLastIsGrounded < jumpCoyoteTimeInTicks // coyote-time: was grounded within last x ticks
+            )
             {
-                // jump
-                Debug.Log("jump " + _framesPassedSinceLastJumpPerformed);
+                // normal jump
                 _rigidbody.velocity = new Vector2(_rigidbody.velocity.x, 0); // remove remaining y speed
                 _rigidbody.AddForce(Vector2.up * jumpForce); // new jump force
-                _framesPassedSinceLastJumpPerformed = 0;
-                _jumpProhibitionframesPassed = 0;
+                _isGrounded = false;
+                _ticksPassedSinceLastJumpPerformed = 0;
                 _isHoldInputJumpBoosting = true;
-                _isHoldDirectionJumpBoosting = true;
-                if (_rigidbody.velocity.x > 0){
-                    _isHoldDirectionJumpBoostingDirection = 1;
-                } else {
-                    _isHoldDirectionJumpBoostingDirection = -1;
-                }
-
             }
-            else if (_canWallJumpFront)
+            else if (_canWallJumpFront || _canWallJumpBack)
             {
                 // wall jump
-                Debug.Log("jump " + _framesPassedSinceLastJumpPerformed);
-                _rigidbody.velocity = new Vector2(0, Math.Max(_rigidbody.velocity.y, 0)); // remove remaining x speed
-                var force = wallJumpForce * 0.7f;
-                _rigidbody.AddForce(new Vector2(-_facingDirection * force, force)); // new jump force
-                _framesPassedSinceLastJumpPerformed = 0;
-                _jumpProhibitionframesPassed = 0;
+                _rigidbody.velocity = new Vector2(
+                    // remove remaining x speed
+                    0,
+                    // cancel negative y speed and reduce positive by factor wallJumpVelocityYReduction
+                    Math.Max(_rigidbody.velocity.y * (1 - wallJumpVelocityYReduction), 0)
+                );
+                var direction = _canWallJumpBack ? _canWallJumpBackDirectiom : _canWallJumpFrontDirectiom;
+                Debug.Log(_canWallJumpFront + " " + _canWallJumpBack + " " + direction + " " + _gameTick);
+                _rigidbody.AddForce(new Vector2(direction * wallJumpForce * 0.7f,
+                    wallJumpForce)); // new jump force
+                _ticksPassedSinceLastJumpPerformed = 0;
+                _isHoldInputJumpBoosting = true;
             }
+        }
+
+        // gravity y
+        _rigidbody.AddForce(Vector2.down * gravity);
+
+        // air resistance y
+        _rigidbody.AddForce(Vector2.up * (-_rigidbody.velocity.y * airFrictionY));
+        
+        if (_isPushingFrontWall && _rigidbody.velocity.y < 0)
+        {
+            _rigidbody.AddForce(Vector2.up * (-_rigidbody.velocity.y * slidingFrictionY));
         }
 
         // hold input jump boost
         if (_jumpInputDown && _isHoldInputJumpBoosting && _rigidbody.velocity.y >= 0)
         {
-            _rigidbody.AddForce(Vector2.up * (_rigidbody.velocity.y * (jumpHoldBoost + airFrictionY)));
+            _rigidbody.AddForce(Vector2.up *
+                                ((_rigidbody.velocity.y * airFrictionY + gravity) * jumpHoldGravityReduction));
         }
         else
         {
             _isHoldInputJumpBoosting = false;
         }
-        
-        // hold direction jump boost
-        if (_isHoldDirectionJumpBoosting && _inputX / _isHoldDirectionJumpBoostingDirection > 0 && !_isGrounded)
+
+
+        float xAccelerationForce;
+        float deltaToTargetSpeed;
+        if (_isGrounded)
         {
-            _rigidbody.AddForce(Vector2.right * (-_rigidbody.velocity.x * airFrictionX));
+            if (_inputX > 0)
+            {
+                if (_rigidbody.velocity.x >= maxMovementSpeedX)
+                {
+                    // decelerate slow towards -x
+                    xAccelerationForce = -decelerationXGroundWithDirectionBoost;
+                }
+                else if (_rigidbody.velocity.x < 0)
+                {
+                    // decelerate fast towards +x
+                    xAccelerationForce = decelerationXGround;
+                }
+                else // (0 <= _rigidbody.velocity.x < maxMovementSpeedHorizontal)
+                {
+                    // accelerate towards +x
+                    xAccelerationForce = accelerationXGround;
+                }
+
+                deltaToTargetSpeed = _rigidbody.velocity.x - maxMovementSpeedX;
+            }
+            else if (_inputX < 0)
+            {
+                if (_rigidbody.velocity.x <= -maxMovementSpeedX)
+                {
+                    // decelerate slow towards +x
+                    xAccelerationForce = decelerationXGroundWithDirectionBoost;
+                }
+                else if (_rigidbody.velocity.x > 0)
+                {
+                    // decelerate fast towards -x
+                    xAccelerationForce = -decelerationXGround;
+                }
+                else // (0 >= _rigidbody.velocity.x > maxMovementSpeedHorizontal)
+                {
+                    // accelerate towards -x
+                    xAccelerationForce = -accelerationXGround;
+                }
+
+                deltaToTargetSpeed = _rigidbody.velocity.x + maxMovementSpeedX;
+            }
+            else
+            {
+                // _inputX == 0
+                if (_rigidbody.velocity.x > 0)
+                {
+                    // decelerate fast towards -x
+                    xAccelerationForce = -decelerationXGround;
+                }
+                else // (0 >= _rigidbody.velocity.x > maxMovementSpeedHorizontal)
+                {
+                    // decelerate fast towards +x
+                    xAccelerationForce = decelerationXGround;
+                }
+
+                deltaToTargetSpeed = _rigidbody.velocity.x;
+            }
         }
         else
         {
-            _isHoldDirectionJumpBoosting = false;
-        }
-
-        // air resistance y
-        _rigidbody.AddForce(Vector2.up * (-_rigidbody.velocity.y * airFrictionY));
-
-        // air resistance x
-        _rigidbody.AddForce(Vector2.right * (-_rigidbody.velocity.x * airFrictionX));
-        
-
-
-        if (_isGrounded) // player is on ground
-        {
-            if (_isMovingX)
+            if (_inputX > 0)
             {
-                // player is moving on ground
-                var maxFactor = Math.Abs(
-                    _inputX * maxMovementSpeedHorizontal - _rigidbody.velocity.x
-                ) / maxMovementSpeedHorizontal;
-                var force = maxFactor * accelerationHorizontalGround * maxMovementSpeedHorizontal;
-                _rigidbody.AddForce(Vector2.right * (_inputX * force * Time.deltaTime));
+                if (_rigidbody.velocity.x >= maxMovementSpeedX)
+                {
+                    // decelerate slow towards -x
+                    xAccelerationForce = -decelerationXAirWithDirectionBoost;
+                }
+                else if (_rigidbody.velocity.x < 0)
+                {
+                    // decelerate fast towards +x
+                    xAccelerationForce = decelerationXAir;
+                }
+                else // (0 <= _rigidbody.velocity.x < maxMovementSpeedHorizontal)
+                {
+                    // accelerate towards +x
+                    xAccelerationForce = accelerationXAir;
+                }
+
+                deltaToTargetSpeed = _rigidbody.velocity.x - maxMovementSpeedX;
+            }
+            else if (_inputX < 0)
+            {
+                if (_rigidbody.velocity.x <= -maxMovementSpeedX)
+                {
+                    // decelerate slow towards +x
+                    xAccelerationForce = decelerationXAirWithDirectionBoost;
+                }
+                else if (_rigidbody.velocity.x > 0)
+                {
+                    // decelerate fast towards -x
+                    xAccelerationForce = -decelerationXAir;
+                }
+                else // (0 >= _rigidbody.velocity.x > maxMovementSpeedHorizontal)
+                {
+                    // accelerate towards -x
+                    xAccelerationForce = -accelerationXAir;
+                }
+
+                deltaToTargetSpeed = _rigidbody.velocity.x + maxMovementSpeedX;
             }
             else
             {
-                // player is stopping on ground
-                _rigidbody.AddForce(Vector2.right * (-_rigidbody.velocity.x * Time.deltaTime * 3600 *
-                                                     (1 - 1 / (decelerationHorizontalGround + 1))));
+                // _inputX == 0
+                if (_rigidbody.velocity.x > 0)
+                {
+                    // decelerate fast towards -x
+                    xAccelerationForce = -decelerationXAir;
+                }
+                else // (0 >= _rigidbody.velocity.x > maxMovementSpeedHorizontal)
+                {
+                    // decelerate fast towards +x
+                    xAccelerationForce = decelerationXAir;
+                }
+
+                deltaToTargetSpeed = _rigidbody.velocity.x;
             }
         }
-        else // player is in air
+
+        // force reduction to prevent overshooting target speed
+        if (Math.Abs(deltaToTargetSpeed) < targetSpeedOvershotPreventionRange)
         {
-            if (_isMovingX)
-            {
-                // player is moving in air
-                var maxFactor = Math.Abs((_inputX * maxMovementSpeedHorizontal - _rigidbody.velocity.x)) /
-                                maxMovementSpeedHorizontal;
-                var force = maxFactor * accelerationHorizontalAir * maxMovementSpeedHorizontal;
-                _rigidbody.AddForce(Vector2.right * (_inputX * force * Time.deltaTime));
-            }
-            else
-            {
-                // player is stopping in air
-                _rigidbody.AddForce(Vector2.right * (-_rigidbody.velocity.x * Time.deltaTime * 3600 *
-                                                     (1 - 1 / (decelerationHorizontalAir + 1))));
-            }
+            xAccelerationForce = xAccelerationForce * Math.Abs(deltaToTargetSpeed) / targetSpeedOvershotPreventionRange;
         }
+
+        _rigidbody.AddForce(Vector2.right * xAccelerationForce);
     }
 
     private void UpdateFrameBasedPlayerStates()
     {
-        _framesPassedSinceLastIsGrounded += 1;
-        _framesPassedSinceLastJumpInput += 1;
-        _framesPassedSinceLastJumpPerformed += 1;
-        _jumpProhibitionframesPassed += 1;
+        _ticksPassedSinceLastIsGrounded += 1;
+        _ticksPassedSinceLastJumpInput += 1;
+        _ticksPassedSinceLastJumpPerformed += 1;
+        _jumpProhibitionTicksPassed += 1;
+        _gameTick++;
+        _gameTick += 1;
     }
 
     private void DebugUpdate()
@@ -463,8 +568,8 @@ public class PlayerController : MonoBehaviour
             _debugRenderer.enabled = true;
             _debugIsCollidingTopSpriteRenderer.enabled = _isCollidingTop > 0;
             _debugIsCollidingBottomSpriteRenderer.enabled = _isCollidingBottom > 0;
-            _debugIsCollidingFrontSpriteRenderer.enabled = _isCollidingFront > 0;
-            _debugIsCollidingBackSpriteRenderer.enabled = _isCollidingBack > 0;
+            _debugIsCollidingFrontSpriteRenderer.enabled = _isCollidingBack > 0;
+            _debugIsCollidingBackSpriteRenderer.enabled = _isCollidingFront > 0;
         }
         else
         {
@@ -477,20 +582,6 @@ public class PlayerController : MonoBehaviour
     {
         _lastSpeed = speed;
         speed = _rigidbody.velocity;
-        if (Math.Abs(speed.x) < 0.01)
-        {
-            speed.x = 0;
-        }
-        else
-        {
-            // Debug.Log(speed.x);
-        }
-
-        if (Math.Abs(speed.y) < 0.01)
-        {
-            speed.y = 0;
-        }
-
         acceleration = speed - _lastSpeed;
         if (Math.Abs(acceleration.x) < 0.01)
         {
@@ -501,5 +592,8 @@ public class PlayerController : MonoBehaviour
         {
             acceleration.y = 0;
         }
+
+        speed.x = (float) Math.Round(speed.x);
+        speed.y = (float) Math.Round(speed.y);
     }
 }
