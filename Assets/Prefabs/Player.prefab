@@ -27,7 +27,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 219262940}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 3, z: -10}
+  m_LocalPosition: {x: 0, y: 2.5, z: -10}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 2603193351546269670}
@@ -254,6 +254,7 @@ GameObject:
   m_Component:
   - component: {fileID: 915861563}
   - component: {fileID: 915861564}
+  - component: {fileID: 638767819}
   m_Layer: 9
   m_Name: Back Wall Jump Collider Trigger
   m_TagString: Untagged
@@ -291,8 +292,22 @@ EdgeCollider2D:
   m_Offset: {x: 0, y: 0}
   m_EdgeRadius: 0
   m_Points:
-  - {x: 0.56, y: 1.77}
-  - {x: 0.56, y: 0.03}
+  - {x: -0.65, y: 1.77}
+  - {x: -0.65, y: 0.03}
+--- !u!114 &638767819
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 915861562}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d8a4f0171cf3feb4fa5953e433345880, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  isCollidingWallJumpBack: 0
+  isCollidingWallJumpBackFacingDirection: 0
 --- !u!1 &1704726032
 GameObject:
   m_ObjectHideFlags: 0
@@ -341,8 +356,8 @@ EdgeCollider2D:
   m_Offset: {x: 0, y: 0}
   m_EdgeRadius: 0
   m_Points:
-  - {x: -0.53, y: 1.77}
-  - {x: -0.53, y: 0.03}
+  - {x: 0.6, y: 1.77}
+  - {x: 0.6, y: 0.03}
 --- !u!114 &1704726034
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -356,6 +371,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   isCollidingWallJumpFront: 0
+  isCollidingWallJumpFrontFacingDirection: 0
 --- !u!1 &2603193351546269666
 GameObject:
   m_ObjectHideFlags: 0
@@ -368,8 +384,8 @@ GameObject:
   - component: {fileID: 2603193351546269671}
   - component: {fileID: 122561719256596158}
   - component: {fileID: 6626100370958581327}
-  - component: {fileID: 8102475043787946589}
   - component: {fileID: 9136206831193486502}
+  - component: {fileID: 8102475043787946589}
   - component: {fileID: 2603193351546269673}
   m_Layer: 9
   m_Name: Player
@@ -411,20 +427,29 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   debugMode: 1
-  accelerationHorizontalGround: 500
-  decelerationHorizontalGround: 1
-  accelerationHorizontalAir: 250
-  decelerationHorizontalAir: 0.5
-  maxMovementSpeedHorizontal: 10
-  jumpCoyoteTimeInFrames: 4
-  jumpInputBufferInFrames: 4
+  maxMovementSpeedX: 15
+  accelerationXGround: 50
+  decelerationXGround: 250
+  decelerationXGroundWithDirectionBoost: 250
+  accelerationXAir: 50
+  decelerationXAir: 150
+  decelerationXAirWithDirectionBoost: 50
+  targetSpeedOvershotPreventionRange: 3
+  jumpForce: 1850
+  wallJumpForce: 1850
+  wallJumpVelocityYReduction: 0.5
+  jumpHoldGravityReduction: 0.4
+  jumpCoyoteTimeInTicks: 5
+  jumpInputBufferInTicks: 5
   peakJumpReducedGravityMultiplier: 0
-  peakJumpReducedGravityAttackSpeed: 0
+  peakJumpReducedGravityMultiplierVariance: 0
+  jumpProhibitionTicks: 5
   jumpCornerCorrectionInTiles: 0
+  gravity: 100
+  airFrictionY: 5
+  slidingFrictionY: 0
   dashForce: 0
   dashCornerCorrectionInTiles: 0
-  jumpForce: 1000
-  wallJumpForce: 1000
   animationGameObject: {fileID: 8645765735932715448}
   selector: {fileID: 771697067}
   throwPower: 100
@@ -466,24 +491,6 @@ EdgeCollider2D:
   m_Points:
   - {x: -0.47, y: 0.01}
   - {x: 0.47, y: 0.01}
---- !u!68 &8102475043787946589
-EdgeCollider2D:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2603193351546269666}
-  m_Enabled: 1
-  m_Density: 1
-  m_Material: {fileID: 6200000, guid: 076a12b52b3fd594494f1c613ecccb81, type: 2}
-  m_IsTrigger: 0
-  m_UsedByEffector: 0
-  m_UsedByComposite: 0
-  m_Offset: {x: 0, y: 0}
-  m_EdgeRadius: 0
-  m_Points:
-  - {x: -0.49, y: 1.77}
-  - {x: -0.49, y: 0.03}
 --- !u!68 &9136206831193486502
 EdgeCollider2D:
   m_ObjectHideFlags: 0
@@ -502,6 +509,24 @@ EdgeCollider2D:
   m_Points:
   - {x: 0.49, y: 1.77}
   - {x: 0.49, y: 0.03}
+--- !u!68 &8102475043787946589
+EdgeCollider2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2603193351546269666}
+  m_Enabled: 1
+  m_Density: 1
+  m_Material: {fileID: 6200000, guid: 076a12b52b3fd594494f1c613ecccb81, type: 2}
+  m_IsTrigger: 0
+  m_UsedByEffector: 0
+  m_UsedByComposite: 0
+  m_Offset: {x: 0, y: 0}
+  m_EdgeRadius: 0
+  m_Points:
+  - {x: -0.49, y: 1.77}
+  - {x: -0.49, y: 0.03}
 --- !u!50 &2603193351546269673
 Rigidbody2D:
   serializedVersion: 4
@@ -517,7 +542,7 @@ Rigidbody2D:
   m_Mass: 1
   m_LinearDrag: 0
   m_AngularDrag: 0
-  m_GravityScale: 5
+  m_GravityScale: 0
   m_Material: {fileID: 6200000, guid: 22c4243a54a24c9438862ecddb566f67, type: 2}
   m_Interpolate: 0
   m_SleepingMode: 0
@@ -960,7 +985,7 @@ Transform:
   m_GameObject: {fileID: 8645765735932715448}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: -0.08, z: 0}
-  m_LocalScale: {x: 1.6, y: 1.6, z: 1}
+  m_LocalScale: {x: -1.6, y: 1.6, z: 1}
   m_Children: []
   m_Father: {fileID: 2603193351546269670}
   m_RootOrder: 2
